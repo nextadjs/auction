@@ -1,0 +1,23 @@
+{
+  "name": "@nextad/auction",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "test": "vitest",
+    "build": "tsup"
+  },
+  "keywords": [],
+  "author": "Kai Miyamoto",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nextadjs/auction.git"
+  },
+  "homepage": "https://github.com/nextadjs/auction.git",
+  "devDependencies": {
+    "@types/node": "^22.10.6",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}
