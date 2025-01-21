@@ -15,9 +15,13 @@
   },
   "homepage": "https://github.com/nextadjs/auction.git",
   "devDependencies": {
-    "@types/node": "^22.10.6",
+    "@nextad/faker": "^0.6.6",
+    "@types/node": "^22.10.7",
     "tsup": "^8.3.5",
     "typescript": "^5.7.3",
     "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "iab-openrtb": "^0.4.3"
   }
 }
