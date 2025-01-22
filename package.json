@@ -21,7 +21,7 @@
     "typescript": "^5.7.3",
     "vitest": "^2.1.8"
   },
-  "dependencies": {
+  "peerDependencies": {
     "iab-openrtb": "^0.4.3"
   },
   "publishConfig": {
