@@ -5,6 +5,7 @@ import {
 } from "./exceptions";
 import type {
   BidResponse as BaseBidResponseV26,
+  Bid,
   Bid as BidV26,
 } from "iab-openrtb/v26";
 import type { BidInformation, CurrencyConversionData } from "./types";
@@ -60,6 +61,14 @@ export class Auction {
 
   public getLosingBids(): { v26: BidV26[] } {
     return this.losingBids;
+  }
+
+  public getBidInformation(bid: BidV26): BidInformation | undefined {
+    return this.bidInformation.get(bid);
+  }
+
+  public getBidInformations(): WeakMap<Bid, BidInformation> {
+    return this.bidInformation;
   }
 
   public placeBidResponseV26(bidResponse: BaseBidResponseV26): this {
