@@ -1,10 +1,13 @@
 import { BidComparator } from "./BidComparator";
-import { BidFactory } from "./BidFactory";
 import {
   AlreadyEndedAuctionException,
   BidNotFoundException,
 } from "./exceptions";
-import type { BaseBidResponseV26, BidV26, CurrencyConversionData } from "./types";
+import type {
+  BidResponse as BaseBidResponseV26,
+  Bid as BidV26,
+} from "iab-openrtb/v26";
+import type { BidInformation, CurrencyConversionData } from "./types";
 
 type AuctionType = "open" | "closed";
 
@@ -22,9 +25,9 @@ export class Auction {
   };
 
   private itemIds: string[] = [];
-  private currencyConversionData?: CurrencyConversionData;
   private status: AuctionType;
   private options: AuctionOptions;
+  private bidInformation: WeakMap<BidV26, BidInformation>;
 
   public constructor(
     itemOrImpressionIds: string | string[],
@@ -41,8 +44,8 @@ export class Auction {
     this.losingBids = {
       v26: [],
     };
-    this.currencyConversionData = options.currencyConversionData;
     this.status = "open";
+    this.bidInformation = new WeakMap();
 
     if (typeof itemOrImpressionIds === "string") {
       this.itemIds.push(itemOrImpressionIds);
@@ -61,9 +64,18 @@ export class Auction {
 
   public placeBidResponseV26(bidResponse: BaseBidResponseV26): this {
     if (bidResponse.seatbid) {
-      this.bids.v26.push(
-        ...BidFactory.createV26Bids(bidResponse, this.itemIds)
-      );
+      const bids: BidV26[] = bidResponse.seatbid.flatMap((seatbid) => {
+        return seatbid.bid.map((bid) => {
+          this.bidInformation.set(bid, {
+            currency: bidResponse.cur,
+            version: "2.6",
+            seat: seatbid.seat,
+          });
+          return bid;
+        });
+      });
+
+      this.bids.v26.push(...bids);
     }
 
     return this;
@@ -78,7 +90,11 @@ export class Auction {
       throw new BidNotFoundException();
     }
 
-    const highestBid = BidComparator.getHighestBidV26(this.bids.v26, this.options.currencyConversionData);
+    const highestBid = BidComparator.getHighestBidV26(
+      this.bids.v26,
+      this.bidInformation,
+      this.options.currencyConversionData
+    );
 
     this.setLosingBids(highestBid);
     this.handleLossBids();
