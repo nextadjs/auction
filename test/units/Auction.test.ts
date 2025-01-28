@@ -39,6 +39,23 @@ describe("Auction", () => {
     expect(result.id).toBe(bidResponse2.seatbid![0].bid[1].id);
   });
 
+  it('excludes bids with non-target impression IDs and returns highest bid from valid impressions', () => {
+    const sut = new Auction(["impid-1"]);
+    const bidResponse = openrtbFaker.v26.bidResponse
+      .addBannerBid({ impid: "impid-1", price: 10 })
+      .make();
+    const bidResponse2 = openrtbFaker.v26.bidResponse
+      .addBannerBid({ impid: "impid-1", price: 20 })
+      .addVideoBid({ impid: "impid-2", price: 30 })
+      .make();
+    sut.placeBidResponseV26(bidResponse);
+    sut.placeBidResponseV26(bidResponse2);
+
+    const result = sut.end();
+
+    expect(result.id).toBe(bidResponse2.seatbid![0].bid[0].id);
+  });
+
   it("returns highest bid considering currency when auction ends", () => {
     const sut = new Auction("impid-1", {
       currencyConversionData: {

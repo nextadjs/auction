@@ -73,16 +73,18 @@ export class Auction {
 
   public placeBidResponseV26(bidResponse: BaseBidResponseV26): this {
     if (bidResponse.seatbid) {
-      const bids: BidV26[] = bidResponse.seatbid.flatMap((seatbid) => {
-        return seatbid.bid.map((bid) => {
-          this.bidInformation.set(bid, {
-            currency: bidResponse.cur,
-            version: "2.6",
-            seat: seatbid.seat,
-          });
-          return bid;
-        });
-      });
+      const bids: BidV26[] = bidResponse.seatbid.flatMap((seatbid) =>
+        seatbid.bid
+          .filter((bid) => this.itemIds.some((itemId) => itemId === bid.impid))
+          .map((bid) => {
+            this.bidInformation.set(bid, {
+              currency: bidResponse.cur,
+              version: "2.6",
+              seat: seatbid.seat,
+            });
+            return bid;
+          })
+      );
 
       this.bids.v26.push(...bids);
     }
