@@ -1,6 +1,6 @@
 {
   "name": "@nextad/auction",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "",
   "scripts": {
     "test": "vitest",
