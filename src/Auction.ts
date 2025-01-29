@@ -3,10 +3,11 @@ import {
   AlreadyEndedAuctionException,
   BidNotFoundException,
 } from "./exceptions";
-import type {
-  BidResponse as BaseBidResponseV26,
-  Bid,
-  Bid as BidV26,
+import {
+  LossReasonCode,
+  type BidResponse as BaseBidResponseV26,
+  type Bid,
+  type Bid as BidV26,
 } from "iab-openrtb/v26";
 import type { BidInformation, CurrencyConversionData } from "./types";
 
@@ -21,6 +22,7 @@ export class Auction {
   private losingBids: {
     v26: BidV26[];
   };
+  private winningBid?: BidV26;
   private bids: {
     v26: BidV26[];
   };
@@ -111,6 +113,7 @@ export class Auction {
     this.handleLossBids();
     this.status = "closed";
 
+    this.winningBid = highestBid;
     return highestBid;
   }
 
@@ -128,9 +131,23 @@ export class Auction {
 
   private handleLossBid(bid: BidV26): void {
     if (this.options.lossProcessing && bid.lurl) {
-      fetch(bid.lurl, {
+      fetch(this.replaceMacro(bid.lurl), {
         keepalive: true,
       });
     }
+  }
+
+  private replaceMacro(url: string): string {
+    const price = this.winningBid ? this.winningBid.price.toFixed(2) : '';
+    const minToWin = this.winningBid ? (this.winningBid.price + 0.01).toFixed(2) : '';
+
+    url = url.replaceAll("${AUCTION_PRICE}", price);
+    url = url.replaceAll(
+      "${AUCTION_MIN_TO_WIN}}",
+      minToWin
+    );
+    url = url.replaceAll("${AUCTION_LOSS}", LossReasonCode.LOST_TO_HIGHER_BID.toString());
+
+    return url;
   }
 }
